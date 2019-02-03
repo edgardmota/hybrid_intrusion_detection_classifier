@@ -1,4 +1,7 @@
 import talos as ta
+from talos import Reporting
+from talos.model.layers import hidden_layers
+from talos.model.normalizers import lr_normalizer
 import numpy as np
 import tensorflow as tf
 from keras.callbacks import CSVLogger
@@ -12,7 +15,7 @@ import keras.preprocessing.text
 from keras.preprocessing import sequence
 from keras import backend as K
 from keras.callbacks import EarlyStopping
-
+from keras.optimizers import Adam, Nadam, RMSprop
 
 class RnaModule(object):
 	#conjuto de exemplos de treino
@@ -36,34 +39,9 @@ class RnaModule(object):
 	activation_function_output_layer = "sigmoid"
 
 	model = None
-	hyperparameters_setting_mode = None
 
 	def __init__(self):
 		print("init rna module")
-
-	def __generateModelHO(self,x_train, y_train, x_val, y_val, params):
-		self.model = Sequential()
-		self.model.add(Dense(params['n_neurons_input'], input_dim= self.input_dim_neurons, init='normal', activation=params['activation_function']))
-		self.model.add(Dense(params['n_neurons_hidden'], init='normal', activation=params['activation_function']))
-		self.model.add(Dense(1, init='normal', activation=params['activation_function']))
-
-		self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-		csv_logger = CSVLogger('training.log')
-
-		#funcao para interromper treinamento quando o erro for suficientemente pequeno
-		early_stopping = EarlyStopping(monitor='loss',patience=20)
-		fit = self.model.fit(x_train, y_train, epochs=500, verbose=2, callbacks=[early_stopping])
-
-		return fit, self.model
-	#Faz a otimização de hiperparâmetros
-	def doHO(self, x, y):
-		p = {
-			'n_neurons_input': [10, 20, 41],
-			'n_neurons_hidden': [10, 20, 41],
-			'activation_function': ['sigmoid', 'relu', 'elu'],
-		}
-		self.hyperparameters_setting_mode = "auto"
-		print(talos.scan(x, y, p, self.__generateModelHO))
 
 	#funcao para criar a rna para abordagem simples
 	def generateModel(self):
@@ -125,57 +103,104 @@ class RnaModule(object):
 		#print(self.test_data_set_labels)
 
 	def setNumberNeuronsInputLayer(self, number):
-		self.hyperparameters_setting_mode = "manual"
 		self.number_neurons_input_layer = number
 
 	def getNumberNeuronsInputLayer(self):
 		return self.number_neurons_input_layer
 
 	def setNumberNeuronsHiddenLayer(self, number):
-		self.hyperparameters_setting_mode = "manual"
 		self.number_neurons_hidden_layer = number
 
 	def getNumberNeuronsHiddenLayer(self):
 		return self.number_neurons_hidden_layer
 
 	def setNumberNeuronsOutputLayer(self, number):
-		self.hyperparameters_setting_mode = "manual"
 		self.number_neurons_output_layer = number
 
 	def getNumberNeuronsOutputLayer(self):
 		return self.number_neurons_output_layer
 
 	def setActivationFunctionInputLayer(self, activation_function):
-		self.hyperparameters_setting_mode = "manual"
 		self.activation_function_input_layer = activation_function
 
 	def getActivationFunctionInputLayer(self):
 		return self.activation_function_input_layer
 
 	def setActivationFunctionHiddenLayer(self, activation_function):
-		self.hyperparameters_setting_mode = "manual"
 		self.activation_function_hidden_layer = activation_function
 
 	def getActivationFunctionHiddenLayer(self):
 		return self.activation_function_hidden_layer
 
 	def setActivationFunctionOutputLayer(self, activation_function):
-		self.hyperparameters_setting_mode = "manual"
 		self.activation_function_output_layer = activation_function
 
 	def getActivationFunctionOutputLayer(self):
 		return self.activation_function_output_layer
 
 	def setInputDimNeurons(self, number):
-		self.hyperparameters_setting_mode = "manual"
 		self.input_dim_neurons = number
 
 	def getNumberNeuronsInputLayer(self):
 		return self.input_dim_neurons
 
 	def setDimInputLayer(self, dim_input_layer):
-		self.hyperparameters_setting_mode = "manual"
 		self.dim_input_layer = dim_input_layer
 
 	def getDimInputLayer(self):
 		return self.dim_input_layer
+
+class RnaModuleHO:
+
+	def __init__ (self, ds, pp, hc, ho_results_file):
+		self.ho_results_file = ho_results_file + '_.csv'
+		self.pp = pp
+		self.pp.setDataSet(ds)
+		self.pp.setTestDataSet(ds) #Gambiarra pois exige dois datasets
+		ds, _ = self.pp.transformCategory()
+		self.x = ds.values[:,0:(len(ds.values[0])-2)]
+		self.y = ds.values[:,(len(ds.values[0])-2)]
+		self.hc = hc
+		self.rna = RnaModule()
+		self._doHO()
+
+	def __generateModelHO(self,x_train, y_train, x_val, y_val, params):
+		print(params)
+		self.rna.model = Sequential()
+		self.rna.model.add(Dense(params['first_neuron'], input_dim=x_train.shape[1], activation=params['activation']))
+		# if we want to also test for number of layers and shapes, that's possible
+		self.rna.model.add(Dropout(params['dropout']))
+		hidden_layers(self.rna.model, params, 1)
+		# then we finish again with completely standard Keras way
+		self.rna.model.add(Dense(1, init='normal', activation=params['last_activation']))
+		self.rna.model.compile(loss=params['losses'],
+			optimizer=params['optimizer'](lr=lr_normalizer(params['lr'],params['optimizer'])),
+			metrics=['accuracy'])
+
+		early_stopping = EarlyStopping(monitor='loss',patience=20)
+		out = self.rna.model.fit(x_train, y_train, validation_data=[x_val, y_val], epochs=500, verbose=2, callbacks=[early_stopping])
+
+		return out, self.rna.model
+
+    	# self.rna.model = Sequential()
+		# self.rna.model.add(Dense(params['n_neurons_input'], input_dim=params['input_dim_neurons'], init='normal', activation=params['i_activation_function']))
+		# self.rna.model.add(Dense(params['n_neurons_hidden'], init='normal', activation=params['h_activation_function']))
+		# self.rna.model.add(Dense(params['n_neurons_output'], init='normal', activation=params['o_activation_function']))
+		#
+		# self.rna.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+		#
+		# #funcao para interromper treinamento quando o erro for suficientemente pequeno
+		# early_stopping = EarlyStopping(monitor='loss',patience=20)
+		#
+		# out = self.rna.model.fit(x_train, y_train, validation_data=[x_val, y_val], epochs=500, verbose=2, callbacks=[early_stopping])
+		#
+		# return out, self.rna.model
+
+	#Faz a otimização de hiperparâmetros
+	def _doHO(self):
+		self.scan_object = ta.Scan(self.x, self.y, self.hc, self.__generateModelHO, dataset_name=self.ho_results_file[:-5])
+
+	def getHyperparameters(self):
+		r = Reporting(self.ho_results_file)
+		print(r.high())
+		return r.best_params()
