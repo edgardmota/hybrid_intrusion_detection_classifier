@@ -165,7 +165,6 @@ class RnaModuleHO:
 		self._doHO()
 
 	def __generateModelHO(self,x_train, y_train, x_val, y_val, params):
-		print(params)
 		self.rna.model = Sequential()
 		self.rna.model.add(Dense(params['first_neuron'], input_dim=x_train.shape[1], activation=params['activation']))
 		# if we want to also test for number of layers and shapes, that's possible
@@ -178,7 +177,7 @@ class RnaModuleHO:
 			metrics=['accuracy'])
 
 		early_stopping = EarlyStopping(monitor='loss',patience=20)
-		out = self.rna.model.fit(x_train, y_train, validation_data=[x_val, y_val], epochs=500, verbose=2, callbacks=[early_stopping])
+		out = self.rna.model.fit(x_train, y_train, validation_data=[x_val, y_val], epochs=500, verbose=0, callbacks=[early_stopping])
 
 		return out, self.rna.model
 

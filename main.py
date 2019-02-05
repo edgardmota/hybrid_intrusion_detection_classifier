@@ -52,7 +52,7 @@ if ((len(sys.argv) > 1) and (sys.argv[1] == '--with-ho')):
 
     hc = {
         'lr': (0.5, 5, 10),
-        'first_neuron':[4, 8, 16, 32, 41, 64],
+        'first_neuron': [4, 8, 16, 32, 41, 64],
         'dropout': (0, 0.5, 5),
         'hidden_layers': [0, 1, 2],
         'losses': [logcosh, binary_crossentropy],
