@@ -107,6 +107,9 @@ class HybridClassifier(object):
 					#adiciona exemplos em um vetor de exemplos classificados como intermediarios
 					self.intermediate_range_samples.append(self.test_data_set.values[i,:])
 					list_position_intermediate_range_samples.append(i)
+			if not self.intermediate_range_samples:
+					self.intermediate_range_samples.append(self.test_data_set.values[0,:])
+					list_position_intermediate_range_samples.append(0)
 			del(self.predictions_rna)
 
 			#cria um dataframe de exemplos classificados pela RNA

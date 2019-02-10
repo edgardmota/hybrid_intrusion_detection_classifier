@@ -44,32 +44,37 @@ class RnaModule(object):
 		print("init rna module")
 
 	#funcao para criar a rna para abordagem simples
-	def generateModel(self):
+	def generateModel(self, inner_call=False):
 		self.model = Sequential()
 		self.model.add(Dense(self.number_neurons_input_layer, input_dim= self.input_dim_neurons, init='normal', activation=self.activation_function_input_layer))
 		self.model.add(Dense(self.number_neurons_hidden_layer, init='normal', activation=self.activation_function_hidden_layer))
 		self.model.add(Dense(self.number_neurons_output_layer, init='normal', activation=self.activation_function_output_layer))
 
-		self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-		csv_logger = CSVLogger('training.log')
-
-		#funcao para interromper treinamento quando o erro for suficientemente pequeno
-		early_stopping = EarlyStopping(monitor='loss',patience=20)
-		fit = self.model.fit(self.data_set_samples, self.data_set_labels, epochs=500, verbose=2, callbacks=[early_stopping])
-
-    #funcao para criar a rna para a abordagem hibrida
-	def generateHybridModel(self):
-		self.model = Sequential()
-		self.model.add(Dense(self.number_neurons_input_layer, input_dim= self.input_dim_neurons, init='normal', activation=self.activation_function_input_layer))
-		self.model.add(Dense(self.number_neurons_hidden_layer, init='normal', activation=self.activation_function_hidden_layer))
-		self.model.add(Dense(self.number_neurons_output_layer, init='normal', activation=self.activation_function_output_layer))
-
-		self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+		# self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+		self.model.compile(loss='logcosh', optimizer=RMSprop(lr=lr_normalizer(2.75,RMSprop)), metrics=['accuracy'])
 		csv_logger = CSVLogger('training.log')
 		#funcao para interromper treinamento quando o erro for suficientemente pequeno
 		early_stopping = EarlyStopping(monitor='loss', patience=20)
 
 		fit = self.model.fit(self.data_set_samples, self.data_set_labels, nb_epoch=500, verbose=2, callbacks=[early_stopping])
+		if inner_call:
+			return fit
+
+    #funcao para criar a rna para a abordagem hibrida
+	def generateHybridModel(self):
+		# self.model = Sequential()
+		# self.model.add(Dense(self.number_neurons_input_layer, input_dim= self.input_dim_neurons, init='normal', activation=self.activation_function_input_layer))
+		# self.model.add(Dense(self.number_neurons_hidden_layer, init='normal', activation=self.activation_function_hidden_layer))
+		# self.model.add(Dense(self.number_neurons_hidden_layer, init='normal', activation=self.activation_function_hidden_layer))
+		# self.model.add(Dense(self.number_neurons_output_layer, init='normal', activation=self.activation_function_output_layer))
+		#
+		# self.model.compile(loss='logcosh', optimizer=RMSprop(lr=lr_normalizer(4.1,RMSprop)), metrics=['accuracy'])
+		# csv_logger = CSVLogger('training.log')
+		# #funcao para interromper treinamento quando o erro for suficientemente pequeno
+		# early_stopping = EarlyStopping(monitor='loss', patience=20)
+		#
+		# fit = self.model.fit(self.data_set_samples, self.data_set_labels, nb_epoch=500, verbose=2, callbacks=[early_stopping])
+		fit = self.generateModel(True)
 
 		#obter valores da camada de saida da ultima iteracao do treinamento
 		get_3rd_layer_output = K.function([self.model.layers[0].input], [self.model.layers[2].output])

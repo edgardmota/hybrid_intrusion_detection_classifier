@@ -7,8 +7,9 @@ name = "pypi"
 pandas = "*"
 sklearn = "*"
 keras = "*"
-tensorflow = "*"
 talos = "*"
+wheel = "*"
+tensorflow = "*"
 
 [dev-packages]
 

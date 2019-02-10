@@ -1,0 +1,5 @@
+round_epochs,val_loss,val_acc,loss,acc,lr,first_neuron,dropout,hidden_layers,losses,optimizer,activation,last_activation
+136,0.04439421037832896,0.926666665871938,0.05410485791308539,0.9314285710879735,1.8499999999999999,41,0.1,0,<function logcosh at 0x7f4aeb709488>,<class 'keras.optimizers.Adam'>,<function relu at 0x7f4aeb6c52f0>,<function elu at 0x7f4aeb6c50d0>
+37,0.19230953693389893,0.5566666666666666,0.21689395938600814,0.5000000010217939,2.75,41,0.30000000000000004,1,<function logcosh at 0x7f4aeb709488>,<class 'keras.optimizers.RMSprop'>,<function relu at 0x7f4aeb6c52f0>,<function relu at 0x7f4aeb6c52f0>
+71,0.1300383412837982,0.6966666666666667,0.163875230550766,0.6042857139451163,0.95,41,0.0,0,<function logcosh at 0x7f4aeb709488>,<class 'keras.optimizers.Nadam'>,<function relu at 0x7f4aeb6c52f0>,<function relu at 0x7f4aeb6c52f0>
+53,0.07809389998515447,0.9700000007947286,0.132549497580954,0.9357142863954817,2.75,41,0.30000000000000004,0,<function binary_crossentropy at 0x7f4aeb709620>,<class 'keras.optimizers.Nadam'>,<function sigmoid at 0x7f4aeb6c5400>,<function tanh at 0x7f4aeb6c5378>

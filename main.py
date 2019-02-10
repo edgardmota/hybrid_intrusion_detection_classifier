@@ -86,13 +86,23 @@ if ((len(sys.argv) > 1) and (sys.argv[1] == '--with-ho')):
     }
 else:
     with_ho = False
+    # h = {
+    #     'n_neurons_input': 41,
+    #     'input_dim_neurons': 41,
+    #     'n_neurons_hidden': 41,
+    #     'n_neurons_output': 1,
+    #     'i_activation_function': 'tanh',
+    #     'h_activation_function': 'tanh',
+    #     'o_activation_function': 'tanh',
+    # }
+
     h = {
-        'n_neurons_input': 41,
+        'n_neurons_input': 32,
         'input_dim_neurons': 41,
-        'n_neurons_hidden': 41,
+        'n_neurons_hidden': 32,
         'n_neurons_output': 1,
-        'i_activation_function': 'tanh',
-        'h_activation_function': 'tanh',
+        'i_activation_function': 'sigmoid',
+        'h_activation_function': 'sigmoid',
         'o_activation_function': 'tanh',
     }
 
