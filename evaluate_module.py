@@ -1,6 +1,7 @@
 import sys, os
 from dataSet import DataSet
 from preprocessor import Preprocessor
+import yaml
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "hybrid")
 
 from hybrid_classifier import HybridClassifier
@@ -23,7 +24,8 @@ class EvaluateModule(object):
 	training_time = 0
 	test_time = 0
 
-	def __init__(self):
+	def __init__(self, h):
+		self.h = h
 		print("init")
 
 
@@ -73,6 +75,14 @@ class EvaluateModule(object):
 					self.number_false_negatives+=1
 					self.err_samples+=1
 
+		setting_file = self.result_path + 'setting.yaml'
+		if not os.path.isfile(setting_file):
+			with open(setting_file, 'w') as yaml_file:
+				n_dict = dict()
+				for key in self.h.keys():
+					n_dict[key] = str(self.h[key])
+				yaml.dump(n_dict, stream=yaml_file, default_flow_style=False)
+		
 		#arquivos para salvar informacoes resumidas das k iteracoes do cross-validation (cada linha representa uma iteracao)
 		arquivoMatriz = open(self.result_path + 'Matriz.txt', 'a+')
 		#salva no formato: VP, FP, FN, VN

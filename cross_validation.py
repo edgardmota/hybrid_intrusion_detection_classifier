@@ -26,9 +26,7 @@ class CrossValidation(object):
 	#conjunto de dados de treinamento
 	training_sub_data_set = None
 
-	evaluate = None
-
-	#numero de folds 
+	#numero de folds
 	k = 1
 
 	file_path = ""
@@ -39,7 +37,6 @@ class CrossValidation(object):
 
 	def __init__(self):
 		print("init")
-		self.evaluate = EvaluateModule()
 
 	def run(self):
 		self.classifier.setResultPath(self.result_path)
@@ -68,14 +65,14 @@ class CrossValidation(object):
 			self.classifier.setIteration(self.iteration)
 			#executa o processo de treino e teste do classificador
 			self.classifier.run()
-			
+
 			del(self.training_sub_data_set)
 			self.loadTestData()
 			#seta conjunto de dados original de teste e iteracao atual do cross-validation na classe de avaliacao
 			self.evaluate.setTestDataSet(self.teste_sub_data_set)
 			self.evaluate.setIteration(self.iteration)
 
-			#verifica quel o metodo de classificacao utilziado 
+			#verifica quel o metodo de classificacao utilziado
 			if(isinstance(self.classifier, RnaClassifier)):
 				print("rna")
 				self.evaluate.setResultPath( self.result_path)
@@ -98,7 +95,7 @@ class CrossValidation(object):
 			self.evaluate.setTestTime(self.classifier.getTestTime())
 			#executa metodo de avaliacao
 			self.evaluate.run()
-	
+
 	#carrega conjunto de treinamento de acordo coma iteracao atual do cross valiadation
 	def loadTrainingData(self):
 		for i in range(1,(self.k+1)):
@@ -129,13 +126,13 @@ class CrossValidation(object):
 		self.preprocessor = preprocessor
 
 	def getPreprocessor(self):
-		return preprocessor	
+		return preprocessor
 
 	def setEvaluateModule(self, evaluate):
 		self.evaluate = evaluate
 
 	def getEvaluateModule(self):
-		return evaluate	
+		return evaluate
 
 	def setFilePath(self, file_path):
 		self.file_path = file_path
@@ -145,4 +142,3 @@ class CrossValidation(object):
 
 	def setK(self, k):
 		self.k = k
-
