@@ -77,8 +77,8 @@ class RnaModule(object):
 		fit = self.generateModel(True)
 
 		#obter valores da camada de saida da ultima iteracao do treinamento
-		get_3rd_layer_output = K.function([self.model.layers[0].input], [self.model.layers[2].output])
-		layer_output = get_3rd_layer_output([self.data_set_samples])[0]
+		get_last_layer_output = K.function([self.model.layers[0].input], [self.model.layers[self.number_hidden_layers + 1].output])
+		layer_output = get_last_layer_output([self.data_set_samples])[0]
 
 
 		predictions = self.model.predict_classes(self.data_set_samples)

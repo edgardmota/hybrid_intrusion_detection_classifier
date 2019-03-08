@@ -15,7 +15,7 @@ preprocessor = Preprocessor()
 preprocessor.setColumnsCategory(['protocol_type','service','flag'])
 
 ho = False
-if ((len(sys.argv) > 1) and (sys.argv[1] == '--with-ho')):
+if ((len(sys.argv) > 1) and (sys.argv[1] == '--do-ho')):
     ho = True
     c_file = sys.argv[2]
 else:
