@@ -8,22 +8,19 @@ class Preprocessor(object):
 	test_data_set = None
 	classes = {}
 
-	def __init__(self):
-		print("init")
-
 	#Funcao para transfmormar atributos categoricos em inteiros
 	def transformCategory(self):
 		le = LabelEncoder()
 		for col in self.columns_category:
 			le.fit(self.data_set[col])
 			self.classes[col]= le.classes_
-			
+
 			self.data_set[col] = le.fit_transform(self.data_set[col])
 			self.test_data_set[col] = le.fit_transform(self.test_data_set[col])
 
-		print("CLASSESS:")
-		print((self.classes))
-		return self.data_set, self.test_data_set 
+
+
+		return self.data_set, self.test_data_set
 
 	#funcao para obter quantidade de classes existentes em determinado atributo
 	@classmethod

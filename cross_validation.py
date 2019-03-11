@@ -35,9 +35,6 @@ class CrossValidation(object):
 	result_path = ""
 	preprocessor = None
 
-	def __init__(self):
-		print("init")
-
 	def run(self):
 		self.classifier.setResultPath(self.result_path)
 		self.foldExecution()
@@ -45,6 +42,7 @@ class CrossValidation(object):
 	def foldExecution(self):
 		i = self.iteration
 
+		self.classifier.setFolds(self.k)
 		for self.iteration in range(i,(self.k+1)):
 			tempo_inicio = time.time()
 			self.loadTrainingData()
@@ -74,19 +72,19 @@ class CrossValidation(object):
 
 			#verifica quel o metodo de classificacao utilziado
 			if(isinstance(self.classifier, RnaClassifier)):
-				print("rna")
+
 				self.evaluate.setResultPath( self.result_path)
 			elif(isinstance(self.classifier, KnnClassifier)):
-				print("knn")
+
 				self.evaluate.setResultPath(self.result_path)
-			elif(isinstance(self.classifier, ClusteredKnnClassifier)):
-				print("clustered knn")
-				#self.evaluate.setResultPath(self.result_path)
-			elif(isinstance(self.classifier, ClusteredDensityKnnClassifier)):
-				print("clustered density knn")
+			# elif(isinstance(self.classifier, ClusteredKnnClassifier)):
+			#
+			# 	#self.evaluate.setResultPath(self.result_path)
+			# elif(isinstance(self.classifier, ClusteredDensityKnnClassifier)):
+
 				#self.evaluate.setResultPath(self.result_path)
 			elif(isinstance(self.classifier, HybridClassifier)):
-				print("hybrid")
+
 				self.evaluate.setResultPath( self.result_path+"final_method_classification/")
 
 			tempo_execucao = time.time() - tempo_inicio
@@ -95,6 +93,7 @@ class CrossValidation(object):
 			self.evaluate.setTestTime(self.classifier.getTestTime())
 			#executa metodo de avaliacao
 			self.evaluate.run()
+		del self.teste_sub_data_set
 
 	#carrega conjunto de treinamento de acordo coma iteracao atual do cross valiadation
 	def loadTrainingData(self):
@@ -107,7 +106,7 @@ class CrossValidation(object):
 				else:
 					self.training_sub_data_set = DataSet.concatSubDataSet(self.training_sub_data_set, new_sub_data_set)
 				del(new_sub_data_set)
-		print((self.training_sub_data_set))
+
 
 	#carrega conjunto de teste de acordo coma iteracao atual do cross valiadation
 	def loadTestData(self):

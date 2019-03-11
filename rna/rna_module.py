@@ -43,9 +43,6 @@ class RnaModule(object):
 
 	model = None
 
-	def __init__(self):
-		print("init rna module")
-
 	#funcao para criar a rna para abordagem simples
 	def generateModel(self, inner_call=False):
 		self.model = Sequential()
@@ -68,7 +65,7 @@ class RnaModule(object):
 		#funcao para interromper treinamento quando o erro for suficientemente pequeno
 		early_stopping = EarlyStopping(monitor='loss', patience=20)
 
-		fit = self.model.fit(self.data_set_samples, self.data_set_labels, nb_epoch=500, verbose=2, callbacks=[early_stopping])
+		fit = self.model.fit(self.data_set_samples, self.data_set_labels, nb_epoch=500, verbose=0, callbacks=[early_stopping])
 		if inner_call:
 			return fit
 
@@ -160,6 +157,10 @@ class RnaModule(object):
 	def setDropout(self, dropout):
 		self.dropout = dropout
 
+	def del_object(self):
+		del self.model, self
+
+
 class RnaModuleHO:
 
 	def __init__ (self, ho_dataset, preprocessor, hc, output_file_prefix, exp_no):
@@ -194,7 +195,7 @@ class RnaModuleHO:
 
 	#Faz a otimização de hiperparâmetros
 	def _doHO(self):
-		# print(self.hc)
+
 		self.scan_object = ta.Scan(
 			self.x,
 		 	self.y,

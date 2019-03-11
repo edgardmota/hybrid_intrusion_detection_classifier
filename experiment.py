@@ -28,58 +28,60 @@ class Experiment(object):
 
     def _run(self):
         if self.exp in range(len(self.h_list)):
-            #CONFIGURACAO DO KNN
-            knn = KnnModule()
-            knn.setKNeighbors(self.h_list[self.exp]['neighbors'])
-            knn_classifier = KnnClassifier()
-            knn_classifier.setKnn(knn)
+            for percentile in self.h_list[self.exp]['percentiles']:
 
-            rna = RnaModule()
+                #CONFIGURACAO DO KNN
+                knn = KnnModule()
+                knn.setKNeighbors(self.h_list[self.exp]['neighbors'])
+                knn_classifier = KnnClassifier()
+                knn_classifier.setKnn(knn)
 
-            rna.setNumberNeuronsInputLayer(self.h_list[self.exp]['n_neurons_input'])
-            rna.setActivationFunctionInputLayer(self.h_list[self.exp]['i_activation_function'])
-            rna.setDropout(self.h_list[self.exp]['dropout'])
-            rna.setNumberHiddenLayers(self.h_list[self.exp]['hidden_layers'])
-            rna.setNumberNeuronsHiddenLayer(self.h_list[self.exp]['n_neurons_hidden'])
-            rna.setActivationFunctionHiddenLayer(self.h_list[self.exp]['h_activation_function'])
-            rna.setNumberNeuronsOutputLayer(self.h_list[self.exp]['n_neurons_output'])
-            rna.setActivationFunctionOutputLayer(self.h_list[self.exp]['o_activation_function'])
-            rna.setLossFunction(self.h_list[self.exp]['losses'])
-            rna.setOptimizer(self.h_list[self.exp]['optimizer'])
-            try:
-                rna.setLearningRate(self.h_list[self.exp]['lr'])
-            except:
-                pass
+                rna = RnaModule()
 
-            rna_classifier = RnaClassifier()
-            rna_classifier.setRna(rna)
+                rna.setNumberNeuronsInputLayer(self.h_list[self.exp]['n_neurons_input'])
+                rna.setActivationFunctionInputLayer(self.h_list[self.exp]['i_activation_function'])
+                rna.setDropout(self.h_list[self.exp]['dropout'])
+                rna.setNumberHiddenLayers(self.h_list[self.exp]['hidden_layers'])
+                rna.setNumberNeuronsHiddenLayer(self.h_list[self.exp]['n_neurons_hidden'])
+                rna.setActivationFunctionHiddenLayer(self.h_list[self.exp]['h_activation_function'])
+                rna.setNumberNeuronsOutputLayer(self.h_list[self.exp]['n_neurons_output'])
+                rna.setActivationFunctionOutputLayer(self.h_list[self.exp]['o_activation_function'])
+                rna.setLossFunction(self.h_list[self.exp]['losses'])
+                rna.setOptimizer(self.h_list[self.exp]['optimizer'])
+                try:
+                    rna.setLearningRate(self.h_list[self.exp]['lr'])
+                except:
+                    pass
 
-            #METODO HIBRIDO
-            hybrid_classifier = HybridClassifier()
-            hybrid_classifier.setPercentilFaixaSup(self.h_list[self.exp]['percentile_upper_range'])
-            hybrid_classifier.setPercentilFaixaInf(self.h_list[self.exp]['percentile_bottom_range'])
-            hybrid_classifier.setRna(rna)
-            hybrid_classifier.setKnn(knn)
+                rna_classifier = RnaClassifier()
+                rna_classifier.setRna(rna)
 
-            evaluate = EvaluateModule(self.h_list[self.exp])
+                #METODO HIBRIDO
+                hybrid_classifier = HybridClassifier()
+                hybrid_classifier.setPercentilFaixaSup(percentile[0])
+                hybrid_classifier.setPercentilFaixaInf(percentile[1])
+                hybrid_classifier.setRna(rna)
+                hybrid_classifier.setKnn(knn)
 
-            self.cross = CrossValidation()
+                evaluate = EvaluateModule(self.h_list[self.exp])
 
-            #DEFINIR A ITERACAO QUE O CROSS VALIDATION ESTA
-            self.cross.setIteration(self.h_list[self.exp]['iteration'])
-            self.cross.setK(self.h_list[self.exp]['k'])
-            self.cross.setPreprocessor(self.h_list[self.exp]['preprocessor'])
+                self.cross = CrossValidation()
 
-            self.cross.setFilePath(self.h_list[self.exp]['dataset_path'])
-            if len(self.h_list) > 1:
-                self.cross.setResultPath("{}/{}-{}/".format(self.h_list[self.exp]['results_path'], self.exp, len(self.h_list) - 1))
-            else:
-                self.cross.setResultPath(self.h_list[self.exp]['results_path'])
-            self.cross.setClassifier(hybrid_classifier)
+                #DEFINIR A ITERACAO QUE O CROSS VALIDATION ESTA
+                self.cross.setIteration(self.h_list[self.exp]['iteration'])
+                self.cross.setK(self.h_list[self.exp]['k'])
+                self.cross.setPreprocessor(self.h_list[self.exp]['preprocessor'])
 
-            self.cross.setEvaluateModule(evaluate)
-            self.cross.run()
-            del evaluate, knn, rna, rna_classifier, hybrid_classifier, self.cross
+                self.cross.setFilePath(self.h_list[self.exp]['dataset_path'])
+                if len(self.h_list) > 1:
+                    self.cross.setResultPath("{}/{}-{}/{}-{}/".format(self.h_list[self.exp]['results_path'], self.exp, len(self.h_list) - 1, percentile[0], percentile[1]))
+                else:
+                    self.cross.setResultPath("{}/{}-{}/".format(self.h_list[self.exp]['results_path'], percentile[0], percentile[1]))
+                self.cross.setClassifier(hybrid_classifier)
+
+                self.cross.setEvaluateModule(evaluate)
+                self.cross.run()
+                del evaluate, knn, knn_classifier, rna, rna_classifier, hybrid_classifier, self.cross
             return True
         else:
             return False

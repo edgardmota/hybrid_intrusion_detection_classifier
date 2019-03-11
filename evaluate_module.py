@@ -1,4 +1,5 @@
 import sys, os
+import pandas
 from dataSet import DataSet
 from preprocessor import Preprocessor
 import yaml
@@ -26,8 +27,6 @@ class EvaluateModule(object):
 
 	def __init__(self, h):
 		self.h = h
-		print("init")
-
 
 	#funcao para executar a avaliacao dos resultados
 	def run(self):
@@ -51,30 +50,24 @@ class EvaluateModule(object):
 		posicao_classe = len(result_dataframe.values[0]) -2
 
 		for i in range(0,len(result_dataframe.values)):
-			self.total_samples+= 1
-			#print("Real: " + str(self.test_data_set.values[i,posicao_classe]) + " -- predito: " + str(result_dataframe.values[i,posicao_classe]))
-			if not (self.test_data_set.loc[i:, self.test_data_set.columns == 'src_bytes'].eq(result_dataframe.loc[i:, self.test_data_set.columns == 'src_bytes']).all().all()):
-				print('Errado')
-			if(self.test_data_set.values[i,posicao_classe] == '0' or self.test_data_set.values[i,posicao_classe] == 0 ):
-				if (result_dataframe.values[i,posicao_classe] == 0 or result_dataframe.values[i,posicao_classe] == '0'):
-					#print("FALSO E CLASSIFICOU COMO FALSO")
-					self.number_true_negatives+=1
-					self.acc_samples+=1
-				else:
-					#print("FALSO E CLASSIFICOU COMO VERDADEIRO")
-					self.number_false_positives+=1
-					self.err_samples+=1
+			self.total_samples += 1
 
-			elif(self.test_data_set.values[i,posicao_classe] == '1' or self.test_data_set.values[i,posicao_classe] == 1):
-				if (result_dataframe.values[i,posicao_classe] == 1 or result_dataframe.values[i,posicao_classe] == '1'):
-					#print("VERDADEIRO E CLASSIFICOU COMO VERDADEIRO")
-					self.number_true_positives+=1
-					self.acc_samples+=1
+			# if not (self.test_data_set.loc[i:, self.test_data_set.columns == 'src_bytes'].eq(result_dataframe.loc[i:, self.test_data_set.columns == 'src_bytes']).all().all()):
+			# print(pandas.concat([self.test_data_set['classe'], result_dataframe['classe']], axis=1, keys=['class', 'predicted']))
+			if(int(self.test_data_set.values[i,posicao_classe]) == 0):
+				if (int(result_dataframe.values[i,posicao_classe]) == 0):
+					self.number_true_negatives += 1
+					self.acc_samples += 1
 				else:
-					#print("VERDADEIRO E CLASSIFICOU COMO FALSO")
-					self.number_false_negatives+=1
-					self.err_samples+=1
-
+					self.number_false_positives += 1
+					self.err_samples += 1
+			elif(int(self.test_data_set.values[i,posicao_classe]) == 1):
+				if (int(result_dataframe.values[i,posicao_classe]) == 1):
+					self.number_true_positives += 1
+					self.acc_samples += 1
+				else:
+					self.number_false_negatives += 1
+					self.err_samples += 1
 		setting_file = self.result_path + 'setting.yaml'
 		if not os.path.isfile(setting_file):
 			with open(setting_file, 'w') as yaml_file:
@@ -82,7 +75,7 @@ class EvaluateModule(object):
 				for key in self.h.keys():
 					n_dict[key] = str(self.h[key])
 				yaml.dump(n_dict, stream=yaml_file, default_flow_style=False)
-		
+
 		#arquivos para salvar informacoes resumidas das k iteracoes do cross-validation (cada linha representa uma iteracao)
 		arquivoMatriz = open(self.result_path + 'Matriz.txt', 'a+')
 		#salva no formato: VP, FP, FN, VN
@@ -138,7 +131,7 @@ NORMAL |   """+ str(self.number_false_positives) + """    ||   """+ str(self.num
 """
 		texto+="""TEMPO DE TESTE: """ + str(self.test_time) + """  |||
 """
-		#recupera quantidade de exmemplos que foram submtidos ao KNN
+		#recupera quantidade de exemplos que foram submetidos ao KNN
 		if (DataSet.checkPathBoolean(self.result_path + "../knn_classification/")):
 			data_set_knn = DataSet.loadSubDataSet( self.result_path + "../knn_classification/cross_"+ str(self.iteration) + "_final_result.csv")
 			texto+= """Exemplos submetidos a segunda classificacao: """ + str(len(data_set_knn))
@@ -149,6 +142,7 @@ NORMAL |   """+ str(self.number_false_positives) + """    ||   """+ str(self.num
 			arquivoKNN.close()
 		arquivo.write(texto)
 		arquivo.close()
+		del data_set_knn, result_dataframe
 
 	def setTestDataSet(self, test_data_set):
 		self.test_data_set = test_data_set

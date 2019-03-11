@@ -34,15 +34,16 @@ class Config_Processor(object):
         MAPPINGS = {
             'general':[
                 (['dataset_path', 'results_path'], None),
-                (['iteration', 'percentile_upper_range', 'percentile_bottom_range'], lambda v: int(v)),
+                (['iteration'], lambda v: int(v)),
+                (['percentiles'], lambda v: eval(v)),
             ],
             'report':[
-                (['report_file', 'metric', 'max_min', 'transformation_suffix'], None),
+                (['report_file', 'metric', 'max_min'], None),
                 (['columns'], lambda v: eval(v)),
                 (['transformations'], lambda v: list(filter(lambda x: len(x) > 0, map(lambda x: x.split(), v.splitlines())))),
             ],
             'hyperparameters': [
-                (['input_dim_neurons', 'dropout', 'hidden_layers', 'neighbors', 'k', 'n_neurons_hidden', 'n_neurons_output', 'n_neurons_input', ], lambda v: int(v)),
+                (['input_dim_neurons', 'dropout', 'hidden_layers', 'neighbors', 'k', 'n_neurons_hidden', 'n_neurons_output', 'n_neurons_input', ], lambda v: eval(v)),
                 (['i_activation_function', 'h_activation_function', 'o_activation_function', 'losses'], None),
                 (['optimizer'], lambda v: eval(v)),
                 (['lr'], lambda v: float(v)),

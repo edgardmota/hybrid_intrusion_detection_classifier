@@ -2,6 +2,7 @@ import sys, os
 import pandas
 import time
 import numpy as np
+from functools import reduce
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../../knn")
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../../rna")
@@ -33,10 +34,7 @@ class HybridClassifier(object):
 	test_time = 0
 	limite_faixa_sup = 0
 	limite_faixa_inf = 0
-
-
-	def __init__(self):
-		print("init")
+	accuracies = []
 
 	def run(self):
 		self.rna_classified_samples= []
@@ -67,7 +65,7 @@ class HybridClassifier(object):
 				positivos = positivos + 1
 				valor_positivo = valor_positivo + outputs_training[i]
 				positivos_serie.append(outputs_training[i])
-
+		print("{}:{}".format(len(positivos_serie),len(negativos_serie)))
 		#cria base de exemplos do KNN
 		self.knn.buildExamplesBase()
 		self.training_time = time.time() - training_time_start
@@ -85,25 +83,37 @@ class HybridClassifier(object):
 		tamanho_data_set = len(self.test_data_set.values)
 		#posicao do atributo "classe" no vetor
 		posicao_classe = len(self.test_data_set.values[0]) - 2
+		predictions_classes_rna = self.rna.predictClasses()
+		total_registers = len(predictions_classes_rna)
+		my_acc = 0
+		for i in range(total_registers):
+			if predictions_classes_rna[i] == int(self.test_data_set.values[i,posicao_classe]):
+				my_acc += 1
+		self.accuracies.append((my_acc/total_registers)*100)
+		if self.iteration >= self.folds:
+			print("Accuracy: {:f}%".format(reduce(lambda a, b: a + b, self.accuracies) / self.folds))
+			self.accuracies.clear()
+		# print(pandas.concat([pandas.Series(list(map(lambda x: x[0], predictions_classes_rna))), pandas.Series(list(map(lambda x: x[0], self.predictions_rna)))], axis=1, keys=['a', 'b']))
+		del predictions_classes_rna
 
 		if (self.verifyClassesPredictions(predictions) == True):
 			#define os limites superiores e inferiores de acordo com os valores de percentil para definir a faixa intermediaria (valores de percentil sao setados no arquivo main.py)
 			self.upper_threshold = np.percentile(positivos_serie,self.percentil_faixa_sup)
 			self.lower_threshold = np.percentile(negativos_serie,(100 - self.percentil_faixa_inf))
-
 			#verifica se valor esta dentro dos limites ou fora
+			print("{:f}|{:f}".format(self.upper_threshold,self.lower_threshold ))
 			for i in range(0,len(self.predictions_rna)):
-				print((self.predictions_rna[i]))
+
 				if(self.predictions_rna[i] > (self.upper_threshold) ):
-					#print("CLASSIFICACAO CONFIAVEL!")
+					# print('sempre')
 					#realiza as modificacoes no dataframe dos exemplos originais de teste de acordo com a classificacao da RNA
 					self.test_data_set.set_value(i, 'classe', 1)
 				elif( self.predictions_rna[i] < (self.lower_threshold)):
-					#print("CLASSIFICACAO CONFIAVEL!")
+					# print('nunca')
 					#realiza as modificacoes no dataframe dos exemplos originais de teste de acordo com a classificacao da RNA
 					self.test_data_set.set_value(i, 'classe', 0)
 				else:
-					#print("FAIXA INTERMEDIARIA!")
+
 					#adiciona exemplos em um vetor de exemplos classificados como intermediarios
 					self.intermediate_range_samples.append(self.test_data_set.values[i,:])
 					list_position_intermediate_range_samples.append(i)
@@ -118,7 +128,7 @@ class HybridClassifier(object):
 					index= list_position_rna_classified_samples,
 					columns= self.test_data_set.columns)
 
-			print(dataframe_rna_classified_samples)
+
 
 			#salva os resultados gerados pela RNA
 			DataSet.saveResults( self.result_path + "rna_classification/", self.iteration, dataframe_rna_classified_samples)
@@ -226,3 +236,6 @@ class HybridClassifier(object):
 
 	def setPercentilFaixaInf(self, limite_faixa):
 		self.percentil_faixa_inf = limite_faixa
+
+	def setFolds(self,folds):
+		self.folds = folds
