@@ -57,6 +57,7 @@ class HybridClassifier(object):
 		negativos_serie =  []
 		#divide os valores da camada de saida da ultima iteracao do treinamento em conjunto de positivos e de negativos
 		for i in range(0,len(outputs_training)):
+			# print(outputs_training[i])
 			if(predictions[i] == 0 ):
 				negativos = negativos + 1
 				valor_negativo = valor_negativo + outputs_training[i]
@@ -65,7 +66,7 @@ class HybridClassifier(object):
 				positivos = positivos + 1
 				valor_positivo = valor_positivo + outputs_training[i]
 				positivos_serie.append(outputs_training[i])
-		print("{}:{}".format(len(positivos_serie),len(negativos_serie)))
+		# print("{}:{}".format(len(positivos_serie),len(negativos_serie)))
 		#cria base de exemplos do KNN
 		self.knn.buildExamplesBase()
 		self.training_time = time.time() - training_time_start
@@ -91,17 +92,17 @@ class HybridClassifier(object):
 				my_acc += 1
 		self.accuracies.append((my_acc/total_registers)*100)
 		if self.iteration >= self.folds:
-			print("Accuracy: {:f}%".format(reduce(lambda a, b: a + b, self.accuracies) / self.folds))
+			# print("Accuracy: {:f}%".format(reduce(lambda a, b: a + b, self.accuracies) / self.folds))
 			self.accuracies.clear()
 		# print(pandas.concat([pandas.Series(list(map(lambda x: x[0], predictions_classes_rna))), pandas.Series(list(map(lambda x: x[0], self.predictions_rna)))], axis=1, keys=['a', 'b']))
 		del predictions_classes_rna
-
+		# print("{}\n{}".format(positivos_serie,negativos_serie))
 		if (self.verifyClassesPredictions(predictions) == True):
 			#define os limites superiores e inferiores de acordo com os valores de percentil para definir a faixa intermediaria (valores de percentil sao setados no arquivo main.py)
 			self.upper_threshold = np.percentile(positivos_serie,self.percentil_faixa_sup)
 			self.lower_threshold = np.percentile(negativos_serie,(100 - self.percentil_faixa_inf))
 			#verifica se valor esta dentro dos limites ou fora
-			print("{:f}|{:f}".format(self.upper_threshold,self.lower_threshold ))
+			# print("{:f}|{:f}".format(self.upper_threshold,self.lower_threshold ))
 			for i in range(0,len(self.predictions_rna)):
 
 				if(self.predictions_rna[i] > (self.upper_threshold) ):
