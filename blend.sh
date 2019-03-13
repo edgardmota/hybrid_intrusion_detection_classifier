@@ -12,7 +12,7 @@ do
 	combined_file=$dir/$COMBINED_FILE_NAME
 	combined_file_temp=$dir/$COMBINED_FILE_NAME.$SUFFIX_TEMP_FILE
 
-	lbase=`echo $dir | perl -pe 's|^\./||g' | perl -pe "s|$FINAL_FILES_PREFIX.*$||g" | perl -pe 's|/|_|g'`
+	lbase=`echo $dir | perl -pe 's|^\./||g' | perl -pe "s|$FINAL_FILES_PREFIX.*$||g" | perl -pe 's|/|_|g' | awk -F'_' '{OFS=FS;$1=$NF=$(NF-1)=$(NF-2)="";print}' | perl -pe 's|(^_+\|_+$)||g'`
 	if [ "$1" == "--with-times" ]
 	then
 		times_file_temp=$dir/$TIMES_FILE.$SUFFIX_TEMP_FILE
