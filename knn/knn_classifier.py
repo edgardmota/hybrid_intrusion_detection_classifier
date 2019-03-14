@@ -47,6 +47,7 @@ class KnnClassifier(object):
 			data_set.set_value(i,'classe',self.predictions[i])
 		DataSet.saveResults(self.result_path, self.iteration, data_set)
 		del data_set
+		del predictions
 
 	def setDataSet(self, data_set):
 		self.data_set = data_set

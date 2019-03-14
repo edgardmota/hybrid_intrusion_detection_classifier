@@ -8,6 +8,7 @@ from knn_module import KnnModule
 from evaluate_module import EvaluateModule
 from cross_validation import CrossValidation
 from talos import Reporting
+import gc
 
 class Experiment(object):
     exp = 0
@@ -81,7 +82,9 @@ class Experiment(object):
 
                 self.cross.setEvaluateModule(evaluate)
                 self.cross.run()
+                rna.del_object()
                 del evaluate, knn, knn_classifier, rna, rna_classifier, hybrid_classifier, self.cross
+                gc.collect()
             return True
         else:
             return False

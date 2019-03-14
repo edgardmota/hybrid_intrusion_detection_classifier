@@ -49,6 +49,8 @@ class RnaClassifier(object):
 
 		DataSet.saveResults(self.result_path, self.iteration, self.test_data_set)
 		del self.test_data_set
+		del self.predictions
+		del self.data_set
 
 	def setDataSet(self, data_set):
 		self.data_set = data_set
