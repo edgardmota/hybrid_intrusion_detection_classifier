@@ -10,6 +10,7 @@ keras = "*"
 talos = "*"
 wheel = "*"
 tensorflow = "*"
+scikit-posthocs = "*"
 
 [dev-packages]
 

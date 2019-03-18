@@ -5,7 +5,8 @@ FINAL_FILES_PREFIX=final_info
 FINAL_FILE=final_comparison.csv
 SUFFIX_TEMP_FILE=temp
 TIMES_FILE=tempo.txt
-SEPARATOR=','
+SEPARATOR='\t'
+RNA_ACC_FILE=rna_acc.txt
 find $RESULTS_DIR -type f -name $COMBINED_FILE_NAME -exec rm {} \;
 for dir in `find $RESULTS_DIR -type f -name "$FINAL_FILES_PREFIX*"  | perl -pe "s|/$FINAL_FILES_PREFIX.*$||g" | sort | uniq`
 do
@@ -17,10 +18,10 @@ do
 	then
 		times_file_temp=$dir/$TIMES_FILE.$SUFFIX_TEMP_FILE
 
-		echo "$lbase"_time_total"$SEPARATOR$lbase"_time_running"$SEPARATOR$lbase"_time_test >> $times_file_temp
+		echo -e "$lbase"_time_total"$SEPARATOR$lbase"_time_running"$SEPARATOR$lbase"_time_test >> $times_file_temp
 		cat $dir/$TIMES_FILE >> $times_file_temp
 	fi
-	echo "$lbase"_percent"$SEPARATOR$lbase"_to_knn >> $combined_file_temp
+	echo -e "$lbase"_percent"$SEPARATOR$lbase"_to_knn >> $combined_file_temp
 	find $dir -type f -name "$FINAL_FILES_PREFIX*" -exec grep -inRH --color=auto "\(corretos\|submetidos\)" {} \; | tr -d '|' | awk '{print $NF}' | awk 'NR%2{printf "%s ",$0;next;}1' | tr ' ' "$SEPARATOR" >> $combined_file_temp
 	if [ "$1" == "--with-times" ]
 	then
@@ -30,4 +31,4 @@ do
 		mv $combined_file_temp $combined_file
 	fi
 done
-paste -d "$SEPARATOR" `find $RESULTS_DIR -type f -name $COMBINED_FILE_NAME` > $FINAL_FILE
+paste -d "$SEPARATOR" `find $RESULTS_DIR -type f -name $COMBINED_FILE_NAME -o -name $RNA_ACC_FILE` > $FINAL_FILE

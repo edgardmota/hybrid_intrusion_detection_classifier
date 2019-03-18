@@ -92,8 +92,14 @@ class HybridClassifier(object):
 				my_acc += 1
 		self.accuracies.append((my_acc/total_registers)*100)
 		if self.iteration >= self.folds:
-			# print("Accuracy: {:f}%".format(reduce(lambda a, b: a + b, self.accuracies) / self.folds))
+			rna_acc_file_name = self.result_path + "../rna_acc.txt"
+			if not os.path.exists(rna_acc_file_name):
+				rna_acc_file = open(rna_acc_file_name, "w")
+				rna_acc_file.write('{}_rna_acc\n'.format('_'.join(list(filter(lambda p: len(p) > 0, self.result_path.split('/')[1:])))))
+				rna_acc_file.writelines(list(map(lambda v: "{:f}\n".format(v),self.accuracies)))
+				rna_acc_file.close()
 			self.accuracies.clear()
+
 		# print(pandas.concat([pandas.Series(list(map(lambda x: x[0], predictions_classes_rna))), pandas.Series(list(map(lambda x: x[0], self.predictions_rna)))], axis=1, keys=['a', 'b']))
 		del predictions_classes_rna
 		# print("{}\n{}".format(positivos_serie,negativos_serie))
