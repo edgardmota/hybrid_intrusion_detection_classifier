@@ -106,24 +106,32 @@ class HybridClassifier(object):
 		if (self.verifyClassesPredictions(predictions) == True):
 			#define os limites superiores e inferiores de acordo com os valores de percentil para definir a faixa intermediaria (valores de percentil sao setados no arquivo main.py)
 			self.upper_threshold = np.percentile(positivos_serie,self.percentil_faixa_sup)
-			self.lower_threshold = np.percentile(negativos_serie,(100 - self.percentil_faixa_inf))
+			self.lower_threshold = np.percentile(negativos_serie,self.percentil_faixa_inf)
 			#verifica se valor esta dentro dos limites ou fora
-			# print("{:f}|{:f}".format(self.upper_threshold,self.lower_threshold ))
+			# print("max:{:f} min:{:f} - max:{:f} min:{:f}".format(np.percentile(positivos_serie,100),np.percentile(positivos_serie,0),np.percentile(negativos_serie,100),np.percentile(negativos_serie,0)))
+			# print("{}:{:f}|{}:{:f} = {:f}".format(self.percentil_faixa_sup,self.upper_threshold,self.percentil_faixa_inf,self.lower_threshold,self.upper_threshold-self.lower_threshold))
 			for i in range(0,len(self.predictions_rna)):
-
-				if(self.predictions_rna[i] > (self.upper_threshold) ):
-					# print('sempre')
-					#realiza as modificacoes no dataframe dos exemplos originais de teste de acordo com a classificacao da RNA
-					self.test_data_set.set_value(i, 'classe', 1)
-				elif( self.predictions_rna[i] < (self.lower_threshold)):
-					# print('nunca')
-					#realiza as modificacoes no dataframe dos exemplos originais de teste de acordo com a classificacao da RNA
-					self.test_data_set.set_value(i, 'classe', 0)
-				else:
-
-					#adiciona exemplos em um vetor de exemplos classificados como intermediarios
+				if((self.predictions_rna[i] <= self.upper_threshold) and (self.predictions_rna[i] >= self.lower_threshold)):
 					self.intermediate_range_samples.append(self.test_data_set.values[i,:])
 					list_position_intermediate_range_samples.append(i)
+				else:
+					if(self.predictions_rna[i] > self.upper_threshold):
+						self.test_data_set.set_value(i, 'classe', 1)
+					elif(self.predictions_rna[i] < self.lower_threshold):
+						self.test_data_set.set_value(i, 'classe', 0)
+				# if(self.predictions_rna[i] > (self.upper_threshold) ):
+				# 	# print('sempre')
+				# 	#realiza as modificacoes no dataframe dos exemplos originais de teste de acordo com a classificacao da RNA
+				# 	self.test_data_set.set_value(i, 'classe', 1)
+				# elif( self.predictions_rna[i] < (self.lower_threshold)):
+				# 	# print('nunca')
+				# 	#realiza as modificacoes no dataframe dos exemplos originais de teste de acordo com a classificacao da RNA
+				# 	self.test_data_set.set_value(i, 'classe', 0)
+				# else:
+				#
+				# 	#adiciona exemplos em um vetor de exemplos classificados como intermediarios
+				# 	self.intermediate_range_samples.append(self.test_data_set.values[i,:])
+				# 	list_position_intermediate_range_samples.append(i)
 			if not self.intermediate_range_samples:
 					self.intermediate_range_samples.append(self.test_data_set.values[0,:])
 					list_position_intermediate_range_samples.append(0)
