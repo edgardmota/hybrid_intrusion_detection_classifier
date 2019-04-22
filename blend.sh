@@ -23,6 +23,21 @@ do
 	fi
 	echo -e "$lbase"_percent"$SEPARATOR$lbase"_to_knn >> $combined_file_temp
 	find $dir -type f -name "$FINAL_FILES_PREFIX*" -exec grep -inRH --color=auto "\(corretos\|submetidos\)" {} \; | tr -d '|' | awk '{print $NF}' | awk 'NR%2{printf "%s ",$0;next;}1' | tr ' ' "$SEPARATOR" >> $combined_file_temp
+	linhas="$lbase"_sensi"$SEPARATOR$lbase"_especi"\n"
+	for file in `find $dir -type f -name "$FINAL_FILES_PREFIX*"`
+	do
+		sensibilidade=`grep ATAQUE $file  | tail -n1 | perl -pe 's|^.*?(\d+).*?(\d+).*$|\1 \2|g'`
+		especificidade=`grep NORMAL $file  | tail -n1 | perl -pe 's|^.*?(\d+).*?(\d+).*$|\1 \2|g'`
+		vp=`echo $sensibilidade| awk '{print $1}'`
+		fn=`echo $sensibilidade| awk '{print $2}'`
+		s=`perl -e "print $vp / ($vp + $fn)"`
+		vn=`echo $especificidade| awk '{print $2}'`
+		fp=`echo $especificidade| awk '{print $1}'`
+		e=`perl -e "print $vn / ($vn + $fp)"`
+		linhas="$linhas$s$SEPARATOR$e\n"
+	done
+	echo -e $linhas | paste $combined_file_temp - > $combined_file
+	mv $combined_file $combined_file_temp
 	if [ "$1" == "--with-times" ]
 	then
 		paste -d "$SEPARATOR" $combined_file_temp $times_file_temp > $combined_file
