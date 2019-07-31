@@ -35,6 +35,8 @@ class HybridClassifier(object):
 	limite_faixa_sup = 0
 	limite_faixa_inf = 0
 	accuracies = []
+	especi = []
+	sensi = []
 
 	def run(self):
 		self.rna_classified_samples= []
@@ -87,18 +89,47 @@ class HybridClassifier(object):
 		predictions_classes_rna = self.rna.predictClasses()
 		total_registers = len(predictions_classes_rna)
 		my_acc = 0
+		fn = 0
+		fp = 0
+		vp = 0
+		vn = 0
 		for i in range(total_registers):
-			if predictions_classes_rna[i] == int(self.test_data_set.values[i,posicao_classe]):
+			real_class = int(self.test_data_set.values[i,posicao_classe])
+			if predictions_classes_rna[i] == real_class:
 				my_acc += 1
+				if predictions_classes_rna[i] == 0:
+					vn += 1
+				else:
+					vp += 1
+			elif (predictions_classes_rna[i] == 0) and (real_class == 1):
+				fn += 1
+			else:
+				fp += 1
 		self.accuracies.append((my_acc/total_registers)*100)
+		self.sensi.append((vp/(vp + fn))*100)
+		self.especi.append((vn/(vn + fp))*100)
 		if self.iteration >= self.folds:
 			rna_acc_file_name = self.result_path + "../rna_acc.txt"
+			rna_sensi_file_name = self.result_path + "../rna_sensi.txt"
+			rna_especi_file_name = self.result_path + "../rna_especi.txt"
 			if not os.path.exists(rna_acc_file_name):
 				rna_acc_file = open(rna_acc_file_name, "w")
 				rna_acc_file.write('{}_rna_acc\n'.format('_'.join(list(filter(lambda p: len(p) > 0, self.result_path.split('/')[1:])))))
 				rna_acc_file.writelines(list(map(lambda v: "{:f}\n".format(v),self.accuracies)))
 				rna_acc_file.close()
+			if not os.path.exists(rna_sensi_file_name):
+				rna_sensi_file = open(rna_sensi_file_name, "w")
+				rna_sensi_file.write('{}_rna_sensi\n'.format('_'.join(list(filter(lambda p: len(p) > 0, self.result_path.split('/')[1:])))))
+				rna_sensi_file.writelines(list(map(lambda v: "{:f}\n".format(v),self.sensi)))
+				rna_sensi_file.close()
+			if not os.path.exists(rna_especi_file_name):
+				rna_especi_file = open(rna_especi_file_name, "w")
+				rna_especi_file.write('{}_rna_especi\n'.format('_'.join(list(filter(lambda p: len(p) > 0, self.result_path.split('/')[1:])))))
+				rna_especi_file.writelines(list(map(lambda v: "{:f}\n".format(v),self.especi)))
+				rna_especi_file.close()
 			self.accuracies.clear()
+			self.especi.clear()
+			self.sensi.clear()
 
 		# print(pandas.concat([pandas.Series(list(map(lambda x: x[0], predictions_classes_rna))), pandas.Series(list(map(lambda x: x[0], self.predictions_rna)))], axis=1, keys=['a', 'b']))
 		del predictions_classes_rna

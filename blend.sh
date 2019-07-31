@@ -7,6 +7,8 @@ SUFFIX_TEMP_FILE=temp
 TIMES_FILE=tempo.txt
 SEPARATOR='\t'
 RNA_ACC_FILE=rna_acc.txt
+RNA_SENSI_FILE=rna_sensi.txt
+RNA_ESPECI_FILE=rna_especi.txt
 find $RESULTS_DIR -type f -name $COMBINED_FILE_NAME -exec rm {} \;
 for dir in `find $RESULTS_DIR -type f -name "$FINAL_FILES_PREFIX*"  | perl -pe "s|/$FINAL_FILES_PREFIX.*$||g" | sort | uniq`
 do
@@ -46,4 +48,4 @@ do
 		mv $combined_file_temp $combined_file
 	fi
 done
-paste -d "$SEPARATOR" `find $RESULTS_DIR -type f -name $COMBINED_FILE_NAME -o -name $RNA_ACC_FILE` > $FINAL_FILE
+paste -d "$SEPARATOR" `find $RESULTS_DIR -type f -name $COMBINED_FILE_NAME -o -name $RNA_ACC_FILE -o -name $RNA_SENSI_FILE -o -name $RNA_ESPECI_FILE` > $FINAL_FILE
